@@ -30,7 +30,7 @@ def send_push_notification(text: str) -> str:
         "https://api.pushover.net/1/messages.json",
         data={"token": os.getenv("PUSHOVER_TOKEN"), "user": os.getenv("PUSHOVER_USER"), "message": text},
     )
-    response.raise_for_status()
+    #response.raise_for_status()
     return "Notification sent"
 
 

@@ -13,7 +13,7 @@ from datetime import datetime
 
 from dotenv import load_dotenv
 from pydantic import BaseModel, Field
-from langchain_openai import ChatOpenAI
+from langchain_ollama import ChatOllama
 from langchain.agents import create_agent
 from langchain.agents.middleware import (
     AgentMiddleware,
@@ -88,8 +88,12 @@ class Sidekick:
     async def setup(self):
         os.makedirs(SANDBOX, exist_ok=True)
         self.tools, self.sessions = await get_all_tools(SANDBOX)
+        model = ChatOllama(
+            model="llama3.2",
+            base_url="http://localhost:11434"
+        )
         self.worker = create_agent(
-            model="openai:gpt-5.4-mini",
+            model=model,
             tools=self.tools,
             system_prompt=f"{WORKER_PROMPT}\nToday is {datetime.now():%A %d %B %Y}.",
             middleware=[
@@ -104,7 +108,7 @@ class Sidekick:
             ],
             checkpointer=self.memory,
         )
-        self.evaluator = ChatOpenAI(model="gpt-5.4-mini").with_structured_output(EvaluatorOutput)
+        self.evaluator = ChatOllama(model="llama3.2").with_structured_output(EvaluatorOutput)
 
     async def evaluate(
         self, message: str, success_criteria: str, last_reply: str, tools_used: list[str]
